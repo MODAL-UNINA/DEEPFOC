@@ -1,5 +1,7 @@
 # DeepFoc: Deep learning framework for determining earthquake focal mechanisms with application to the Campi Flegrei caldera
 
+![Logo del progetto](images/logo.jpg)
+
 This repository contains code for seismic analysis and focal mechanism inversion using deep learning. It includes scripts for training and testing a custom model that predicts focal mechanism parameters, comparing model outputs with results obtained via FPfit. Additionally, there are tools for synthetic data generation, performance evaluation, and visualization (e.g., Amplitude comparison plots, beachball plots).
 
 ## Table of Contents

@@ -1,0 +1,65 @@
+batch_per_epoch: 100
+batch_size: 1024
+beta_total_concentration: 4
+epochs: 10000
+exclude_dip:
+- 0
+- 90
+exclude_rake:
+- -180
+- 0
+- 180
+exclude_strike:
+- 360
+features_size: 33
+fixed_dataset_epochs: 0
+float_type: float64
+id_device: '3'
+loss: Kagan+MSE
+lr: 0.0001
+metrics: Kagan+Discrepancy+Moment+FocalMetrics
+model_name: AmplitudePolaritiesModel
+normal_noise: 0.25
+patience: 500
+polygon_zone: Zone 1
+print_epoch: 25
+save_dir: zona35_beta4
+scaled_parameters:
+- 0
+- 1
+- 0
+- 1
+- 0
+- 1
+sdr_boundary:
+- 0
+- 360
+- 0
+- 90
+- -90
+- 90
+sdr_steps:
+- 1
+- 1
+- 1
+seed: null
+split: false
+stations_file: stations_campi_flegrei.dat
+switch_sign: 0.0
+velmod_file: velmod_campi_flegrei.dat
+weight_decay: 1.0e-06
+xyz_boundary:
+- -2.304362872317724
+- 3.156112639458161
+- -0.952561810232015
+- 2.471478375508665
+- 2.0
+- 3.0
+xyz_points: false
+xyz_steps:
+- 0.1
+- 0.1
+- 0.05
+zeroing:
+- 0.7
+- 0.9

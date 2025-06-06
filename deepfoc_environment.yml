@@ -1,0 +1,23 @@
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+dependencies:
+  - fastcore=1.7.20
+  - geopandas=1.0.1
+  - joblib=1.4.2
+  - matplotlib=3.10.0
+  - mplstereonet=0.6.3
+  - pandas=2.2.3
+  - plotly=6.0.1
+  - python=3.11.11
+  - python-kaleido=0.2.1
+  - pytorch=2.5.1
+  - pytorch-cuda=12.4
+  - pytorch-lightning=2.5.0.post0
+  - scipy=1.15.2
+  - seaborn=0.13.2
+  - tqdm=4.67.1
+  - usgs-strec=2.3.8.1

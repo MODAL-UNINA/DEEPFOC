@@ -1,0 +1,4 @@
+conda create -n aibeachball_torch python==3.11
+conda activate aibeachball_torch
+conda install pytorch::pytorch
+conda install -c conda-forge pandas matplotlib tqdm fastcore geopandas pytorch-lightning usgs-strec joblib mplstereonet scipy plotly python-kaleido seaborn

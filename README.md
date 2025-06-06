@@ -61,7 +61,7 @@ The project implements a complete pipeline for seismic data analysis, including:
 ### 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/stefanoizzo/DEEPFOC.git
+git clone https://github.com/MODAL-UNINA/DEEPFOC.git
 cd DEEPFOC
 ```
 

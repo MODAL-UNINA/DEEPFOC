@@ -1,0 +1,5 @@
+files in this directory are from Pete Lombard, who modified them for NCSS (see his CHANGES comment).
+I added new code for the rev command and was able to compile with gfortran.
+
+fpplot fppage don't yet compile
+

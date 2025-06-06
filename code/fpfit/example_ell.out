@@ -1,0 +1,226 @@
+ parameter settings for fpfit
+ -----------------------------
+ttl   1 'example_ell.arc                            Tue Jan 19 17:55:33 1999'
+hyp 'example_ell.arc'
+out 'example.out'
+sum 'example.fps'
+pol 'example.pol'
+jmp 'example_ell.inp'
+for   2
+mag      0.    
+obs  15
+dis  0.1000E+06
+res   100.0    
+ain      0.      180.0    
+amp   0
+bst   0
+fin   1
+rep   1
+cmp   0
+hdr  0.1000E-01 0.2000E-01 0.5000E-01 0.1000    
+mcr   1.000      1.000      1.000      1.000    
+dir   90.00      250.0      20.00      5.000    
+dip   10.00      90.00      20.00      5.000    
+rak  -180.0      160.0      20.00      10.00    
+chn   1 'VHZ'
+hds   1 '2'
+mcs   1 'W'
+
+
+ SUMMARY OF STATIONS HAVING POLARITIES IN DISCREPANCY WITH BEST FIT SOLUTION (* DENOTES REVERSED STATION)
+  STATION     DISCREPANCIES    AGREEMENTS       TOTAL  WEIGHTED ERROR RATE   TOTAL ERROR CONTRIBUTION
+
+  ACH                0              2              2          0.000          0.0000
+  AUB                0              2              2          0.000          0.0000
+  AUC                0              2              2          0.000          0.0000
+  AUE                0              2              2          0.000          0.0000
+  AUH                0              2              2          0.000          0.0000
+  AUI                0              2              2          0.000          0.0000
+  AUL                0              2              2          0.000          0.0000
+  AUP                0              2              2          0.000          0.0000
+  AUS                0              2              2          0.000          0.0000
+  AUW                0              2              2          0.000          0.0000
+  BAL                0              1              1          0.000          0.0000
+  BGL                0              3              3          0.000          0.0000
+  BGM                0              1              1          0.000          0.0000
+  BGR                0              3              3          0.000          0.0000
+  BKG                0              3              3          0.000          0.0000
+  BRLK               0              2              2          0.000          0.0000
+  CDD                0              2              2          0.000          0.0000
+  CGL                0              3              3          0.000          0.0000
+  CHX                0              1              1          0.000          0.0000
+  CKL                0              3              3          0.000          0.0000
+  CKN                0              3              3          0.000          0.0000
+  CKT                0              3              3          0.000          0.0000
+  CNP                0              2              2          0.000          0.0000
+  CNTC               0              2              2          0.000          0.0000
+  CP2                0              2              2          0.000          0.0000
+  CRP                0              3              3          0.000          0.0000
+  CTG                0              1              1          0.000          0.0000
+  CUT                0              2              2          0.000          0.0000
+  DDM                0              1              1          0.000          0.0000
+  DFR                0              3              3          0.000          0.0000
+  DHY                0              1              1          0.000          0.0000
+  FIB                0              2              2          0.000          0.0000
+  FID                0              1              1          0.000          0.0000
+  GHO                0              2              2          0.000          0.0000
+  GLB                1              0              1          1.000          0.0021
+  GLI                0              1              1          0.000          0.0000
+  GOU                0              1              1          0.000          0.0000
+  HDA                0              2              2          0.000          0.0000
+  HMT                0              1              1          0.000          0.0000
+  HOM                0              1              1          0.000          0.0000
+  ILB                0              1              1          0.000          0.0000
+  ILI                0              2              2          0.000          0.0000
+  ILS                0              2              2          0.000          0.0000
+  ILW                0              2              2          0.000          0.0000
+  INE                0              2              2          0.000          0.0000
+  IVE                0              2              2          0.000          0.0000
+  IVS                0              1              1          0.000          0.0000
+  KBM                0              2              2          0.000          0.0000
+  KCE                0              2              2          0.000          0.0000
+  KDC                0              2              2          0.000          0.0000
+  KEL                0              2              2          0.000          0.0000
+  KJL                0              2              2          0.000          0.0000
+  KLU                0              3              3          0.000          0.0000
+  KNK                0              2              2          0.000          0.0000
+  KVT                0              2              2          0.000          0.0000
+  LTI                0              1              1          0.000          0.0000
+  MDM                0              1              1          0.000          0.0000
+  MMN                0              2              2          0.000          0.0000
+  MSP                0              2              2          0.000          0.0000
+  NAG                0              1              1          0.000          0.0000
+  NCG                0              3              3          0.000          0.0000
+  NCT                0              3              3          0.000          0.0000
+  NKA                0              2              2          0.000          0.0000
+  NNL                0              2              2          0.000          0.0000
+  OPT                0              2              2          0.000          0.0000
+  PAX                0              1              1          0.000          0.0000
+  PDB                0              1              1          0.000          0.0000
+  PMS                0              2              2          0.000          0.0000
+  PRG                0              2              2          0.000          0.0000
+  PWA                0              2              2          0.000          0.0000
+  PWL                0              2              2          0.000          0.0000
+  RAG                0              1              1          0.000          0.0000
+  RDT                0              3              3          0.000          0.0000
+  RED                0              2              2          0.000          0.0000
+  REF                0              3              3          0.000          0.0000
+  SAW                0              2              2          0.000          0.0000
+  SCM                0              2              2          0.000          0.0000
+  SKN                0              2              2          0.000          0.0000
+  SLK                0              2              2          0.000          0.0000
+  SPU                0              1              1          0.000          0.0000
+  SSN                0              2              2          0.000          0.0000
+  SVW                0              3              3          0.000          0.0000
+  SYI                0              1              1          0.000          0.0000
+  TOA                0              3              3          0.000          0.0000
+  TTA                0              2              2          0.000          0.0000
+  TZL                0              1              1          0.000          0.0000
+  VLZ                0              1              1          0.000          0.0000
+  VZW                0              1              1          0.000          0.0000
+  WAX                0              1              1          0.000          0.0000
+  XLV                0              2              2          0.000          0.0000
+
+ TOTAL              1            169            170
+
+ SUMMARY OF HAND-PICKED DATA WITH RESPECT TO BEST FIT SOLUTIONS
+  QUAL        DISCREPANCIES    AGREEMENTS       TOTAL     WEIGHTED ERROR RATE
+
+   0                0            164            164         0.0000    
+   1                1              5              6         0.0931  **
+   2                0              0              0         0.0000    
+   3                0              0              0         0.0000    
+
+ TOTAL              1            169            170
+
+ SUMMARY OF MACHINE-PICKED DATA WITH RESPECT TO BEST FIT SOLUTIONS
+  QUAL        DISCREPANCIES    AGREEMENTS       TOTAL     WEIGHTED ERROR RATE
+
+   0                0              0              0         0.0000    
+   1                0              0              0         0.0000    
+   2                0              0              0         0.0000    
+   3                0              0              0         0.0000    
+
+ TOTAL              0              0              0
+
+ DISTRIBUTION OF SOLUTION MISFIT SCORES
+  MISFIT SCORE     NUM    CUM NUM
+ 0.000 - 0.025       3        3
+ 0.025 - 0.050       0        3
+ 0.050 - 0.075       0        3
+ 0.075 - 0.100       0        3
+ 0.100 - 0.125       0        3
+ 0.125 - 0.150       0        3
+ 0.150 - 0.175       0        3
+ 0.175 - 0.200       0        3
+ 0.200 - 0.225       0        3
+ 0.225 - 0.250       0        3
+ 0.250 - 0.275       0        3
+ 0.275 - 0.300       0        3
+ 0.300 - 0.325       0        3
+ 0.325 - 0.350       0        3
+ 0.350 - 0.375       0        3
+ 0.375 - 0.400       0        3
+ 0.400 - 0.425       0        3
+ 0.425 - 0.450       0        3
+ 0.450 - 0.475       0        3
+ 0.475 - 0.500       0        3
+
+ DISTRIBUTION OF SOLUTION DIP RANGES
+  RANGE       NUM    CUM NUM
+    0.0         1        1
+    5.0         0        1
+   10.0         2        3
+   15.0         0        3
+   20.0         0        3
+   25.0         0        3
+   30.0         0        3
+   35.0         0        3
+   40.0         0        3
+   45.0         0        3
+
+ DISTRIBUTION OF SOLUTION STRIKE RANGES
+  RANGE       NUM    CUM NUM
+    0.0         0        0
+    5.0         1        1
+   10.0         1        2
+   15.0         1        3
+   20.0         0        3
+   25.0         0        3
+   30.0         0        3
+   35.0         0        3
+   40.0         0        3
+   45.0         0        3
+   50.0         0        3
+   55.0         0        3
+   60.0         0        3
+   65.0         0        3
+   70.0         0        3
+   75.0         0        3
+   80.0         0        3
+   85.0         0        3
+   90.0         0        3
+
+ DISTRIBUTION OF SOLUTION RAKE RANGES
+  RANGE       NUM    CUM NUM
+    0.0         1        1
+   10.0         1        2
+   20.0         1        3
+   30.0         0        3
+   40.0         0        3
+   50.0         0        3
+   60.0         0        3
+   70.0         0        3
+   80.0         0        3
+   90.0         0        3
+  100.0         0        3
+  110.0         0        3
+  120.0         0        3
+  130.0         0        3
+  140.0         0        3
+  150.0         0        3
+  160.0         0        3
+  170.0         0        3
+  180.0         0        3
+
+  3 EVENTS READ,   3 PROCESSED

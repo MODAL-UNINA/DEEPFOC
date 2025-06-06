@@ -1,0 +1,1301 @@
+
+static char SccsId[] = "@(#)xdevice.c 2.4 92/09/25";
+
+/*****************************************/
+/*            Joseph Lee Plesha          */
+/*            U.S. Geological Survey     */
+/*            Branch of Geophysics       */
+/*            Mail Stop 964              */
+/*            Box 25046, DFC             */
+/*            Denver, Colorado           */
+/*             (303)   236-1410          */
+/*              FTS    776-1410          */
+/*****************************************************************/
+/* Changes made by Ken Funabashi  Summer 92                      */
+/*                                                               */
+/* Jun.17.1992 Add new function                                  */
+/*              setline2xw(thick, style)                         */
+/* Jun.17.1992 Add new function                                  */
+/*              pixelarrayxw(px, py, m, n, colorind)             */
+/*****************************************************************/
+
+#include <signal.h>
+#include <stdio.h>
+#include <X11/Xos.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
+#include <X11/cursorfont.h>
+#include <X11/keysym.h>
+#include "xdevice.bit"
+#include "xdevice.h"
+
+#define NAMEW	"(USGS) Xplot graphics"
+#define BORDER	1
+#define FONT "8x13"
+#define EV_MASK (KeyPressMask)
+
+/* This driver has been stolen from the GRASS 3.0 & 4.0 version driver set. */
+
+int SCREEN_LEFT;
+int SCREEN_RIGHT;
+int SCREEN_BOTTOM;
+int SCREEN_TOP;
+int SC_WID;
+int SC_HITE;
+int NCOLORS = 256; 
+int BITPLANES; 
+
+int backing_store;
+int screen=0;
+
+/* declare some variables that will be externs in some other routines */
+
+Display *dpy, *tmpdpy;
+Window  curwin;
+Pixmap  bkupmap;
+GC      gc;
+XImage *curimage;
+XEvent	myevent;
+static short alloc = 0 ;
+static short gotimage = 0;
+Colormap curcmap;
+Cursor curcurse, curxh;
+unsigned long color_location[256];
+unsigned long color_pixels[256];
+unsigned long           myforeground, mybackground;
+unsigned long gemask;
+char *curstr = " ";
+XFontStruct *fontstruct;	/* Font descpritor */
+Atom wmProtocolsAtom;
+Status result;
+
+int depth;
+int class;
+Visual *vis;
+char xwlabel[] = {"Plot"};
+int argc;
+char **argv;
+
+#ifdef HPUX
+ sizexw(nc,nr)
+#else
+ sizexw_(nc,nr)
+#endif
+int *nc, *nr;
+{
+   if ((tmpdpy = XOpenDisplay(NULL)) == NULL) {
+	fprintf(stderr, "sizexw: can't open %s\n", XDisplayName(NULL));
+	fprintf(stderr, "Please, check your DISPLAY environment variable.\n");
+	fflush(stderr);
+	exit(-1);
+    }
+  
+   *nc = DisplayWidth(tmpdpy, DefaultScreen(tmpdpy));
+   *nr = DisplayHeight(tmpdpy, DefaultScreen(tmpdpy));
+}
+
+#ifdef HPUX
+ initxw(nc,nr)
+#else
+ initxw_(nc,nr)
+#endif
+int *nc, *nr;
+{
+    
+    XGCValues   gcv;		/* Struct for creating GC */
+    XSetWindowAttributes xswa;	/* Temporary Set Window Attribute struct */
+    XWindowAttributes xwa;	/* Temporary Get Window Attribute struct */
+    XSizeHints *xsh;
+    XClassHint *xch;
+    XWMHints   *xwh;
+    XColor fg_color, bg_color;  /* Temp set colormap entry struct */
+    XColor default_colors[256];
+    Atom closedownAtom;
+    XTextProperty windowName, iconName;
+    char       *geomSpec;	/* Window geometry string */
+    
+    int x,y,i;
+
+/*
+ * Open the display using the $DISPLAY environment variable to locate
+ * the X server. Return 0 if cannot open. 
+*/
+
+   if ((dpy = XOpenDisplay(NULL)) == NULL) {
+	fprintf(stderr, "Graph_Set: can't open %s\n", XDisplayName(NULL));
+	fprintf(stderr, "Please, check your DISPLAY environment variable.\n");
+	fflush(stderr);
+	exit(-1);
+    }
+
+    screen = DefaultScreen(dpy);
+    depth = DefaultDepth(dpy, screen);
+    vis = DefaultVisual(dpy, screen);
+    class = vis->class;
+    backing_store = DoesBackingStore(DefaultScreenOfDisplay(dpy)); 
+
+/*
+    printf ("%s%d\n", " *** depth = ", depth);
+    printf ("%s%d\n", " *** class = ", class);
+*/
+
+/*
+ * Load the font to use. GRASS doesn't at this point use fonts,
+ * but may someday in the future.
+*/
+    if ((fontstruct = XLoadQueryFont(dpy, FONT)) == NULL) {
+	fprintf(stderr, "initxw: display %s doesn't know font %s\n",
+		DisplayString(dpy), FONT);
+	fflush(stderr);
+	exit(-1);
+    }
+
+    if (depth > 1) 
+    {
+    NCOLORS = DisplayCells(dpy, screen);
+    fg_color.pixel = BlackPixel(dpy, screen);
+    bg_color.pixel = WhitePixel(dpy, screen);
+/*
+*    XQueryColor(dpy, DefaultColormap(dpy, screen), &bg_color);
+*    XQueryColor(dpy, DefaultColormap(dpy, screen), &fg_color);
+*/
+
+/*
+*    curcmap = XCreateColormap(dpy, DefaultRootWindow(dpy),
+*    DefaultVisual(dpy,screen), AllocAll);
+*/
+/*
+*    (void) XAllocColor(dpy, curcmap, &bg_color);
+*    (void) XAllocColor(dpy, curcmap, &fg_color);
+*/
+
+/* Initialize the color_locations array in case no palette is called */
+    for (i = 0; i < 256; i++)  color_location[i] = (unsigned long) i;
+
+/* Query all of the colors in the Default Map */
+    for (i = 0; i < 256; i++)  default_colors[i].pixel = (unsigned long) i;
+    XQueryColors(dpy,  DefaultColormap(dpy, screen), default_colors, 256);
+
+/* Copy the Default color map to our colormap */
+     curcmap = XCopyColormapAndFree (dpy, DefaultColormap(dpy, screen));
+
+/* Allocate the first 240 colors in our color map. This seems to erase the
+colors used by other windows so we re-store the first 240 colors. */
+    result = XAllocColorCells (dpy, curcmap, 0, NULL, 0, color_pixels, 240);
+	if (result == 0) printf ("%s %d \n", "Error in result =", result);
+    XStoreColors (dpy, curcmap, default_colors, 240);
+
+    }
+
+    xsh = XAllocSizeHints();
+    xsh->flags = (USPosition | USSize | PMinSize | PMaxSize);
+    xsh->width    = DisplayWidth(dpy, screen) - 50;
+    xsh->height = DisplayHeight(dpy, screen) - 60 ;
+/*
+    Resize the window to rows and columns
+*/
+    xsh->width  = *nc + 1;
+    xsh->height = *nr + 1;
+    xsh->max_width  = DisplayWidth(dpy, screen) - 20;
+    xsh->min_width  = 0;
+    xsh->min_height = 0;
+    xsh->max_height = DisplayHeight(dpy, screen) - 30 ;
+    xsh->x = xsh->y = 10 ;
+				     
+    if (xsh->width > xsh->max_width)
+        xsh->width = xsh->max_width;
+    if (xsh->height > xsh->max_height)
+        xsh->height = xsh->max_height;
+
+/* Start with the window's colormap field pointing to the default
+ * colormap. Later pointer enter events will cause a switch to the
+ * color map. Also, set Bit Gravity to reduce Expose events. 
+*/
+
+    xswa.event_mask = gemask =
+	 ExposureMask | ButtonPressMask | StructureNotifyMask ;
+
+    xswa.backing_store = Always;
+
+    if (depth > 1)
+    {
+    xswa.colormap = curcmap;
+    xswa.border_pixel = fg_color.pixel;
+    xswa.background_pixel = bg_color.pixel;
+    }
+    else
+    {
+    xswa.border_pixel =  BlackPixel (dpy, screen);
+    xswa.background_pixel = WhitePixel (dpy, screen);
+    }
+
+/* Create the Window with the information in the XSizeHints, the
+ * border width,  and the border & background pixels. 
+*/
+
+    if (depth > 1)
+    {
+     curwin = XCreateWindow(dpy, DefaultRootWindow(dpy), xsh->x,
+	    xsh->y, (unsigned)xsh->width, (unsigned)xsh->height,
+	    BORDER, DefaultDepth(dpy, screen),
+	    InputOutput, DefaultVisual(dpy, screen),
+	    (CWEventMask | CWBackingStore | CWColormap | CWBorderPixel |
+	     CWBackPixel), &xswa);
+    }
+    else
+    {
+     curwin = XCreateWindow(dpy, DefaultRootWindow(dpy), xsh->x,
+	    xsh->y, (unsigned)xsh->width, (unsigned)xsh->height,
+	    BORDER, DefaultDepth(dpy, screen),
+	    InputOutput, DefaultVisual(dpy, screen),
+	    (CWEventMask | CWBackingStore | CWBorderPixel |
+	     CWBackPixel), &xswa);
+/*
+    myforeground =  BlackPixel (dpy, screen);
+    mybackground =  WhitePixel (dpy, screen);
+   curwin = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), xsh->x,
+	    xsh->y, (unsigned)xsh->width, (unsigned)xsh->height,
+	     5, myforeground, mybackground);
+        XSetStandardProperties (dpy, curwin, xwlabel, xwlabel,
+                None, argv, argc, xsh);
+        XSetWMHints (dpy, curwin, xwh);
+*/
+
+    }
+
+/* properties for window manager */
+
+    xwh = XAllocWMHints();
+/* If you want the window to come up as an icon uncomment the line below */
+/*  xwh->initial_state = IconicState; */
+/*    xwh->icon_pixmap = XCreateBitmapFromData(dpy, curwin, icon_bits,
+    icon_width, icon_height);
+    xwh->flags |= StateHint | IconPixmapHint;
+*/
+/*
+    iconName.encoding = XA_STRING;
+    iconName.format = 8;
+    iconName.value = (u_char *) NAMEW;
+    iconName.nitems = strlen((char *) iconName.value);
+    iconName.encoding = XA_STRING;
+    iconName.format = 8;
+*/
+    windowName.encoding = XA_STRING;
+    windowName.format = 8;
+    windowName.value = (u_char *) NAMEW;
+    windowName.nitems = strlen((char *) windowName.value);
+
+    xch = XAllocClassHint();
+    xch->res_name = NULL;
+    xch->res_class = NAMEW;
+    XSetWMProperties(dpy, curwin, &windowName, &windowName, NULL, 0, 
+		     xsh, xwh, xch);
+    closedownAtom = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+    wmProtocolsAtom = XInternAtom(dpy, "WM_PROTOCOLS", False);
+    (void) XSetWMProtocols(dpy, curwin, &closedownAtom, 1);
+
+/* Create the cursors to be used later */
+
+    curcurse = curxh = XCreateFontCursor(dpy, XC_arrow);
+
+/* Create the GC for writing the text. */
+    gcv.font = fontstruct->fid;
+
+    if (depth > 1)
+    {
+    gcv.foreground = fg_color.pixel;
+    gcv.background = bg_color.pixel;
+    gc = XCreateGC(dpy, curwin, (GCFont | GCForeground | GCBackground), &gcv);
+    }
+    else
+    {
+    gcv.foreground =  BlackPixel (dpy, screen);
+    gcv.background =  WhitePixel (dpy, screen);
+    gc = XCreateGC(dpy, curwin, 0, 0);
+    XSetBackground (dpy, gc, gcv.background);
+    XSetForeground (dpy, gc, gcv.foreground);
+    }
+
+    XSelectInput(dpy, curwin, ExposureMask); 
+    
+/* Map the window to make it visible. This causes an expose event */
+
+    XMapWindow(dpy, curwin);
+
+    Service_Xevent(0);
+
+/*
+    gemask = ( ExposureMask | ButtonPressMask | 
+	       EnterWindowMask | LeaveWindowMask | StructureNotifyMask);	
+*/
+    gemask = ( ExposureMask |
+	       EnterWindowMask | LeaveWindowMask | StructureNotifyMask);	
+
+    XSelectInput(dpy, curwin, gemask); 
+    XNextEvent (dpy, &myevent);
+    
+/* Find out how big the window really is (in case window manager
+ * overrides our request) and set the SCREEN values. 
+*/
+    SCREEN_LEFT = SCREEN_TOP = 0;
+   
+    if (XGetWindowAttributes(dpy, curwin, &xwa) == 0) {
+        fprintf(stderr, "initxw: cannot get window attributes\n");
+        return 0;
+    }
+    SCREEN_RIGHT = xwa.width - 1;
+    SCREEN_BOTTOM = xwa.height - 1;
+    SC_WID = xwa.width;
+    SC_HITE = xwa.height;
+    
+    if (!backing_store) {
+      fprintf(stderr, "\n WARNING: Your window manager does not have Backing_Store enabled.\n");
+      fprintf(stderr, "           The window displayed cannot be obscured by other windows or\n");
+      fprintf(stderr, "           its contents will be destroyed.\n\n");
+    }
+
+#ifdef SUN
+    signal(SIGHUP, xsigint);
+    signal(SIGINT, xsigint);
+    signal(SIGQUIT, xsigint);
+    signal(SIGILL, xsigint);
+    signal(SIGSTP, SIG_IGN);
+#endif
+
+   XClearWindow(dpy, curwin);
+   XFlush(dpy);
+
+    return (1);
+}
+
+#ifdef SUN
+static int xsigint()
+{
+	XDestroyWindow(dpy,curwin);
+	exit(-1) ;
+}
+#endif
+
+/*
+ * Close down the graphics processing.  This gets called only at driver
+ * termination time.
+ */
+
+
+#ifdef HPUX
+ closexw()
+#else
+ closexw_()
+#endif
+{
+	XDestroyWindow(dpy,curwin);
+	return(0) ;
+}
+
+#ifdef HPUX
+ flushxw()
+#else
+ flushxw_()
+#endif
+{
+	XFlush(dpy);
+	return(0) ;
+}
+
+#ifdef HPUX
+ clearxw()
+#else
+ clearxw_()
+#endif
+{
+   XClearWindow(dpy, curwin);
+   XFlush(dpy);
+}
+
+/*
+ * The systems color represented by "number" is set using the color component
+ * intensities found in the "red", "grn", and "blu" variables.  A value of
+ * 0 represents 0 intensity; a value of 255 represents 100% intensity.
+ *
+ * This routine uses several externals :
+ *  dpy - the pointer to the X display defined in Graph_Set.c,
+ *  NCOLORS - the maximum no. of colors possible in the colormap,
+ *  curcmap - the colormap for the created in initxw.
+ */
+
+#ifdef HPUX
+ palxw(red, green, blue, color)
+#else
+ palxw_(red, green, blue, color)
+#endif
+int *red, *green, *blue;
+int *color ;
+{
+
+if (depth > 1)
+{
+ XColor sd;
+ int r,g,b ;
+ int number ;
+ unsigned long location ;
+
+ number = *color;
+ if (number >= NCOLORS) return;	/* ignor out-of-range vals */
+
+/* Allocate a new color cell.  Because we have already allocated the first 240,
+	this location should be 240 or higher ... */
+ result = XAllocColorCells (dpy, curcmap, 0, NULL, 0, &location, 1);
+	if (result == 0) printf ("%s %d \n", "Error in result =", result);
+
+/*
+*  printf ("%s %d \n", "Location = ", (int) location);
+*/
+
+/* convert to the 0-65535 range for X,
+ * put into XColor struct, and set.
+ */
+
+ r = *red;
+ g = *green;
+ b = *blue;
+	
+ sd.red = r*257;
+ sd.green = g*257;
+ sd.blue = b*257;
+ sd.flags = ( DoRed | DoGreen | DoBlue );
+
+ sd.pixel = location;
+
+ color_location[number] = sd.pixel;
+
+ XStoreColor(dpy, curcmap, &sd);
+ XInstallColormap(dpy, curcmap);
+}
+
+ return(0);
+}
+
+/* Font and Keyboard routines Stolen from Noel */
+
+#ifdef HPUX
+readxw(c)
+#else
+readxw_(c)
+#endif
+short int *c;
+{
+	XEvent	event;
+	int count;
+	char buffer[64];
+	int bufsize=65;
+	KeySym keysym;
+	XComposeStatus compose;
+	int length;
+
+	XSelectInput(dpy, curwin, EV_MASK);
+
+	*c = 0;
+
+	while(1) {
+		XNextEvent( dpy, &event);
+		printf("got here 1\n");
+		count = XLookupString(&event, buffer, bufsize,
+			&keysym, &compose);
+		printf("got here 2\n");
+		if((keysym == XK_Return || keysym == XK_KP_Enter) ||
+			(keysym == XK_Linefeed)) {
+				*c = (short int) 10;
+				return;
+		} else  if (((keysym >= XK_KP_Space) 
+			&& (keysym <= XK_KP_9))
+			|| ((keysym >= XK_space) 
+			&& (keysym <= XK_asciitilde))) {
+				*c = (short int) buffer[0];
+				return;
+		} else if ((keysym == XK_BackSpace) || (keysym == XK_Delete)) {
+				*c = (short int) -1;
+				return;
+/*		} else if (((keysym >= XK_Shift_L) 
+			&& (keysym <= XK_Hyper_R)) 
+			|| ((keysym >= XK_F1) 
+			&& (keysym <= XK_F35))) {
+				; */
+		}
+	}
+}
+
+#ifdef HPUX
+ textxw(x1,y1,c)
+ int *x1,*y1;
+#else
+ textxw_(x1,y1,c)
+ int *x1,y1;
+#endif
+short int *c;
+{
+	XTextItem	xtext;
+	char text[2];
+	static int width, height,y2,y,x;
+
+#ifdef HPUX
+	y = (SCREEN_BOTTOM - *y1);
+#else
+	y = (SCREEN_BOTTOM - y1);
+#endif
+
+	width = fontstruct->max_bounds.rbearing - 
+		fontstruct->min_bounds.lbearing;
+	height = fontstruct->ascent + fontstruct->descent;
+	y2 = y - fontstruct->ascent;
+
+	if (*c == 10) {
+		/* this is a newline.  Just add and return */
+		*x1 = 1;
+#ifdef HPUX
+		*y1 -= height;
+#else
+		y1 -= height;
+#endif
+		return;
+	}
+
+	if (*c == -1) {
+		/* this is a backspace */
+		*x1 -= width;
+		if (*x1 < 1) *x1 = 1;
+		x = *x1;
+/*		XClearArea(dpy, curwin, x, y2, width, height, False); */
+		return;
+	}
+
+/* Clear out this space */
+
+	x = *x1;
+/*	XClearArea(dpy, curwin, x, y2, width, height, False); */
+
+	text[0]=(char) *c;
+	text[1]='\0';
+
+	xtext.chars = text;
+	xtext.nchars = 1;
+	xtext.delta = 0;
+	xtext.font = NULL;
+
+	XDrawText(dpy, curwin, gc, x, y, &xtext, 1);
+
+	*x1 += width;
+}
+
+#ifdef HPUX
+ writexw(x,y,line)
+#else
+ writexw_(x,y,line)
+#endif
+int *x,*y;
+char *line;
+{
+	int i;
+	short int c;
+	int xhold, yhold;
+
+	xhold = *x;
+	yhold = *y;
+	for(i = 0 ; i < 80 ; i++) {
+		c = (short int) *line++;
+		if (c == '\0') break;
+#ifdef HPUX
+ textxw(x,y,&c);
+#else
+ textxw_(x,yhold,&c);
+#endif
+	}
+	/* send a newline to increment y */
+	c = 10;
+#ifdef HPUX
+ textxw(x,y,&c);
+#else
+ textxw_(x,yhold,&c);
+#endif
+	*x = xhold;
+	XFlush(dpy);
+}
+
+char *malloc(), *realloc();
+static num_alloc = 0;
+static XPoint *pnts = NULL;
+
+XPoint *AllocXPoints(count)
+int count;
+{
+    if (num_alloc < count) {
+        if (num_alloc == 0)
+            pnts = (XPoint *) malloc((unsigned) (count * sizeof(XPoint)));
+        else
+            pnts = (XPoint *) realloc((char *) pnts, (unsigned) (count *
+                            sizeof(XPoint)));
+        if (pnts == NULL) {
+            fprintf(stderr, "AllocXPoints: can't alloc %d XPoints.\n",
+                    count);
+            num_alloc = 0;
+            return NULL;
+        }
+        num_alloc = count;
+    }
+    return (pnts);
+}
+
+/* A polygon is drawn using the current color.  It has "number"
+ * verticies which are found in the absolute coordinate pairs
+ * represented in the "xarray" and "yarray" arrays.  NOTE: Cursor
+ * location is NOT updated in Polygon_rel(). */
+
+XPoint *AllocXPoints();
+
+#ifdef HPUX
+ polygonxw(xarray, yarray, count)
+#else
+ polygonxw_(xarray, yarray, count)
+#endif
+int *xarray, *yarray, *count;
+{
+    register i;
+    register XPoint *xpnts;
+    int number;
+
+    number = *count;
+
+    /* The two separate x and y coord arrays must be combined for X.
+     * First allocate space for the XPoint struct. */
+    xpnts = AllocXPoints(number);
+    /* now move coordinate pairs together */
+    for (i = 0; i < number; i++) {
+        xpnts[i].x = (short) xarray[i];
+        xpnts[i].y = (short) (SCREEN_BOTTOM - yarray[i]);
+    }
+    XFillPolygon(dpy, curwin, gc, xpnts, number, Complex,
+            CoordModeOrigin);
+
+    return 1;
+}
+
+
+#ifdef HPUX
+ boxxw(x1, y1, x2, y2, color)
+#else
+ boxxw_(x1, y1, x2, y2, color)
+#endif
+int *x1, *y1, *x2, *y2;
+int *color;
+{
+    int xl, yl, xu, yu, xw, yw, tmp;
+    int clr;
+
+    clr = *color;
+
+    xl = *x1;
+    yl = *y1;
+    xu = *x2;
+    yu = *y2;
+
+    if ( xl > xu )
+    {
+      tmp = xl;
+      xl  = xu;
+      xu  = tmp;
+    }
+
+    if ( yl > yu )
+    {
+      tmp = yl;
+      yl  = yu;
+      yu  = tmp;
+    }
+ 
+    xw = xu - xl + 1;
+    yw = yu - yl + 1;
+
+    yl = SCREEN_BOTTOM - yl;
+    yu = SCREEN_BOTTOM - yu;
+
+    XSetForeground(dpy,gc,(unsigned long)clr) ;
+    XFillRectangle(dpy,curwin,gc,xl,yu,xw,yw) ;
+
+    return(0);
+}
+
+
+#ifdef HPUX
+ linexw(x1, y1, x2, y2)
+#else
+ linexw_(x1, y1, x2, y2)
+#endif
+int *x1, *y1, *x2, *y2;
+{
+    int xl, yl, xu, yu;
+
+    xl = *x1;
+    yl = *y1;
+    xu = *x2;
+    yu = *y2;
+
+    yl = SCREEN_BOTTOM - yl;
+    yu = SCREEN_BOTTOM - yu;
+
+
+    XDrawLine(dpy,curwin,gc,xl,yl,xu,yu) ;
+    XFlush(dpy);
+
+    return(0);
+}
+
+
+#ifdef HPUX
+ setfontxw(font)
+#else
+ setfontxw_(font)
+#endif
+char *font;
+{
+    if ((fontstruct = XLoadQueryFont(dpy, font)) == NULL) {
+	fprintf(stderr, "initxw: display %s doesn't know font %s\n",
+	DisplayString(dpy), font);
+	fflush(stderr);
+	exit(-1);
+    }
+    return(0);
+}
+
+#ifdef HPUX
+ setfillxw(color,style)
+#else
+ setfillxw_(color,style)
+#endif
+int *color, *style;
+{
+    int clr, sty;
+
+    clr  =  *color;
+    sty  =  *style;
+
+#ifdef HPUX
+ setcolorxw(clr);
+#else
+ setcolorxw_(clr);
+#endif
+    XSetFillStyle(dpy,gc,sty);
+
+    return(0);
+}
+
+#ifdef HPUX
+ setlinexw(color, thick, style)
+#else
+ setlinexw_(color, thick, style)
+#endif
+int *color, *thick, *style;
+{
+    int thk, sty;
+
+    thk  =  *thick;
+    sty  =  *style;
+
+#ifdef HPUX
+ setcolorxw(color);
+
+#else
+ setcolorxw_(color);
+#endif
+    XSetLineAttributes(dpy,gc,(unsigned long)thk,sty,CapNotLast,JoinRound);
+
+    return(0);
+}
+
+#ifdef HPUX
+ setcolorxw(color)
+#else
+ setcolorxw_(color)
+#endif
+int *color;
+{
+    int clr;
+
+    clr = *color;
+
+    if (depth > 1)
+    {
+    XSetForeground(dpy,gc,(unsigned long)color_location[clr]);
+    }
+
+    return(0);
+}
+
+
+/*
+ * Using mouse device, get a new screen coordinate and button number.
+ * Button numbers must be the following values which correspond to the
+ * following software meanings:
+ *   1 - left button
+ *   2 - middle button
+ *   3 - right button
+ *
+ * This is called directly by the application programs.
+ *
+ * A "pointing hand" pointer is used. 
+ * Upon button depression, the current coordinate is returned in (*wx, *wy) and
+ * the button pressed in returned in *button.
+ */
+
+#ifdef HPUX
+ get_pointxw(wx, wy, button)
+#else
+ get_pointxw_(wx, wy, button)
+#endif
+	int *wx, *wy ;
+	int *button ;
+{
+	XEvent bpevent;
+
+    gemask = ( ExposureMask | ButtonPressMask | 
+	       EnterWindowMask | LeaveWindowMask | StructureNotifyMask);	
+
+    XSelectInput(dpy, curwin, gemask); 
+
+	/* set the cursor on (defined in initxw) */
+	XDefineCursor(dpy,curwin,curcurse);
+
+	/* wait for a button-push event in the window,
+	 * and return the x,y coord and button number
+	 */
+	
+	XWindowEvent(dpy,curwin,ButtonPressMask, &bpevent);
+	*wx = bpevent.xbutton.x;
+	*wy = SCREEN_BOTTOM - bpevent.xbutton.y;
+	*button = bpevent.xbutton.button;
+	
+    gemask = ( ExposureMask |
+	       EnterWindowMask | LeaveWindowMask | StructureNotifyMask );	
+
+    XSelectInput(dpy, curwin, gemask); 
+
+    return;
+}
+
+
+/*
+ * Using mouse device, get a new screen coordinate and button number.
+ * Button numbers must be the following values which correspond to the
+ * following software meanings:
+ *   1 - left button
+ *   2 - middle button
+ *   3 - right button
+ *
+ * This is called directly by the application programs.
+ *
+ * A "rubberband" line is used.  One end is fixed at the (cx, cy) coordinate.
+ * The opposite end starts out at (*nx, *ny) and then tracks the mouse.
+ * Upon button depression, the current coordinate is returned in (*nx, *ny) and
+ * the button pressed in returned in *button.
+ */
+
+static int drawn = 0;
+int oldwidth, oldheight;
+unsigned long event_mask;
+
+/*================================================================*/
+/* Erase the current line */
+
+static EraseRubberLine (x1, y1, x2, y2)
+int x1, y1, x2, y2;
+
+{
+  if (drawn)
+     XDrawLine (dpy, curwin, gc, x1, y1, x2, y2);
+  drawn = 1;
+}
+
+/*=================================================================*/
+
+#ifdef HPUX
+ get_linexw(px, py, nx, ny, button)
+#else
+ get_linexw_(px, py, nx, ny, button)
+#endif
+	int *px, *py ;    /* current x and y */
+	int *nx, *ny ;  /* new x and y */
+	int *button ;
+{
+	XEvent event;
+	int cx, cy;
+
+	cx = *px;
+	cy = SCREEN_BOTTOM - *py;
+        
+        event_mask = PointerMotionMask | ButtonPressMask;
+        XSelectInput (dpy, curwin, event_mask);
+        XSetFunction (dpy, gc, GXxor);
+
+	while (1)
+	{
+	XWindowEvent(dpy, curwin, event_mask, &event);
+	switch (event.type)
+	      {
+		case MotionNotify:
+                     *nx = event.xbutton.x;
+                     *ny = event.xbutton.y;
+		     if (drawn)
+			 EraseRubberLine(cx, cy, oldwidth, oldheight);
+		     XDrawLine (dpy, curwin, gc, cx,cy, *nx, *ny);
+		     oldwidth = *nx;
+		     oldheight = *ny;
+		     drawn = 1;
+                     break;
+
+		case ButtonPress:
+		     *nx = event.xbutton.x;
+		     *ny = SCREEN_BOTTOM - event.xbutton.y;
+		     *button = event.xbutton.button;
+	   	      EraseRubberLine (cx, cy, oldwidth, oldheight);
+		      XSetFunction (dpy, gc, GXcopy);
+		      drawn = 0;
+		      XSelectInput(dpy,curwin,gemask);
+		      return 0;
+	      }
+	}
+}
+
+
+/*
+ * Using mouse device, get a new screen coordinate and button number.
+ * Button numbers must be the following values which correspond to the
+ * following software meanings:
+ *   1 - left button
+ *   2 - middle button
+ *   3 - right button
+ *
+ * This is called directly by the application programs.
+ *
+ * A "rubberband" box is used.  One corner is fixed at the (cx, cy) coordinate.
+ * The opposite coordinate starts out at (*nx, *ny) and then tracks the mouse.
+ * Upon button depression, the current coordinate is returned in (*nx, *ny) and
+ * the button pressed in returned in *button.
+ */
+
+
+unsigned width, height;
+int oldx, oldy;
+
+/*
+ * Define the bits for the box cursor
+ *
+ * ur = XCreateFontCursor (dpy, XC_ur_angle);
+ * ul = XCreateFontCursor (dpy, XC_ul_angle);
+ * ll = XCreateFontCursor (dpy, XC_ll_angle);
+ * lr = XCreateFontCursor (dpy, XC_lr_angle);
+ * current_cursor = ul;
+ */
+/*=================================================================*/
+ /* Erases the current RubberBox */
+ 
+ static EraseRubberBox(x1,y1,x2,y2)
+ int x1,y1;
+ unsigned x2,y2;
+ 
+ {
+   if (drawn)
+     XDrawRectangle(dpy, curwin, gc, x1, y1, x2, y2);
+    drawn = 1;
+  }
+
+/*==================================================================*/
+/*
+ */
+#ifdef HPUX
+ get_boxxw(px, py, nx, ny, button)
+#else
+ get_boxxw_(px, py, nx, ny, button)
+#endif
+   int *px, *py ;    /* current x and y */
+   int *nx, *ny ;  /* new x and y */
+   int *button ;
+{
+  XEvent event;
+  int leftx, topy;
+  int cx, cy;
+
+  cx = *px;
+  cy = SCREEN_BOTTOM - *py;
+
+  /* Get events that track the pointer to resize the
+     RubberBox until ButtonReleased */
+  
+  event_mask = ButtonPressMask | PointerMotionMask;
+  XSelectInput (dpy, curwin, event_mask );
+
+  /* XOR, so double drawing returns pixels to original state */
+  
+  XSetFunction (dpy, gc, GXxor);
+
+  /* Set the crosshair cursor */
+  XDefineCursor(dpy,curwin,curxh);
+
+  while (1)
+  {
+   XWindowEvent(dpy, curwin, event_mask, &event);
+
+   switch (event.type)
+	{
+	case ButtonPress:
+	     *button = event.xbutton.button;
+	     *nx = event.xbutton.x;
+	     *ny = SCREEN_BOTTOM - event.xbutton.y;
+	     EraseRubberBox (oldx,oldy, oldwidth, oldheight); 
+	     XSetFunction (dpy, gc, GXcopy);
+  	     XDefineCursor(dpy,curwin,curcurse); /* reset cursor */
+	     drawn =0;
+	     XSelectInput(dpy,curwin,gemask); /*restore normal events*/
+	     return 0;
+
+	case MotionNotify:
+	     *nx = event.xbutton.x;
+	     *ny = event.xbutton.y;
+	     /* do a double draw to 'erase' previous rectangle */
+	     if (drawn)
+		EraseRubberBox(oldx,oldy, oldwidth, oldheight);
+	     /* need to draw a rectangle with (cx,cy) as one corner
+	      * and (*nx,*ny) as opposite corner. Figure the top left
+	      * coords of such a rectangle
+	      */
+	     if (cx < *nx) 
+		 { leftx = cx; width = *nx - cx; }
+	     else
+		 { leftx = *nx; width = cx - *nx; }
+	     if (cy < *ny)
+		 { topy = cy; height = *ny - cy; }
+	     else
+		 { topy = *ny; height = cy - *ny; }
+	     /* don't draw a zero volumn rectangle */
+             if (width && height)
+                {
+	         XDrawRectangle(dpy, curwin, gc, leftx,topy,width,height);
+	         oldwidth = width;
+	         oldheight = height;
+		 oldx = leftx; oldy = topy;
+	         drawn = 1;
+		}
+     	     else 
+ 		drawn = 0;
+	     break;
+	}
+  }		
+}
+
+static char *imdata;
+
+#ifdef HPUX
+ rasxw(x, y, num, array, rot)
+#else
+ rasxw_(x, y, num, array, rot)
+#endif
+ int *x, *y ;
+ int *num ;
+ int *array ;
+ int *rot ;
+{
+ int i,j ;
+ int cur_x, cur_y ;
+ int number ;
+ int rotate ;
+ int *arr ;
+ char *calloc(), *realloc() ;
+
+ XWindowAttributes xwa;
+ char *pix ;
+
+ cur_x = *x, cur_y = *y ; 
+ number = *num ; 
+ rotate = *rot ; 
+
+/* Unless this is 1st time thru or if raster line length has changed,
+ * we don't need to reallocate space or re-create the Ximage.
+ */
+ 
+ if (alloc < number) {
+
+  if(gotimage) {
+   XDestroyImage(curimage); /* destroy any previous images */
+   gotimage = 0;
+  }
+
+  if (alloc == 0 )
+   imdata = calloc((number), sizeof(char)) ;
+  else
+   imdata = realloc(imdata, sizeof(char)*(number)) ;
+	    
+  if (imdata == NULL)
+   return(-1) ;    /* not enough space left */
+
+  alloc = number ;
+	
+  if (XGetWindowAttributes(dpy,curwin,&xwa) == 0)
+   return (-1);
+	    
+  curimage = XCreateImage(dpy,xwa.visual,8,ZPixmap,0,imdata,number,1,8,0);
+	    
+  gotimage = 1;
+ }
+
+ pix=imdata;
+ arr=array;
+
+ for(i=0;i<number;i++)   
+  *pix++=(char)(*arr++);
+
+
+ if(rotate == 2 || rotate == 4) {
+  XPutImage(dpy,curwin,gc,curimage,0,0,cur_x,cur_y,1,number);
+ }
+ else {
+  XPutImage(dpy,curwin,gc,curimage,0,0,cur_x,SCREEN_BOTTOM - cur_y,number,1);
+ } 
+ return(0);
+}
+
+/******************************************** 
+    This event handler is not implemented.
+    But it is called once from initxw()
+********************************************/
+
+static int firstime = 1;
+Service_Xevent(wait)
+int wait;
+{
+    XEvent event;
+    XWindowAttributes xwa;
+
+    /*
+     * If wait is zero wait for and service the next X event. If wait 
+     * is non-zero see if any events are ready. If none just return.
+     */
+    
+    if ( wait != 0 ) {
+	if (!XPending(dpy)) {
+             XSync(dpy, False);
+	     return;  		/* no events in queue, return */
+        }
+	XNextEvent(dpy, &event);
+    }
+
+    /*
+     * On the first Expose events, write the display message.
+     * For now, on subsequent expose copy the backup window to
+     * the display window.
+     */
+    if ((wait == 0) || (event.type == Expose && event.xexpose.count == 0)
+	 || event.type == ConfigureNotify)
+    {
+     if (firstime)
+     {
+       int x, y;
+
+       firstime = 0;
+
+       if (XGetWindowAttributes(dpy, curwin, &xwa) == 0)
+	   return;
+      
+       x = (xwa.width -
+  	    XTextWidth(fontstruct, curstr, strlen(curstr))) / 2;
+       y = (xwa.height + fontstruct->max_bounds.ascent
+            - fontstruct->max_bounds.descent) / 2;
+
+    /* Fill the window with the background color,  and then
+     * paint the centered string. */
+    
+       XClearWindow(dpy, curwin);
+       XDrawString(dpy, curwin, gc, x, y, curstr, strlen(curstr));
+       XFlush(dpy);
+
+     }
+     else 
+     {
+
+      if (XGetWindowAttributes(dpy, curwin, &xwa) == 0)
+          return;
+
+      firstime = 0;
+       
+      SC_WID  = xwa.width;
+      SC_HITE = xwa.height;
+     
+     }
+    }
+
+    /* When the pointer enters the display window we need
+     * to switch to the colormap. Likewise, when we exit we
+     * switch back to the default. Some window managers will take
+     * care of this for us, but we cannot depend on a manager.
+     */
+    
+    else if (event.type == EnterNotify && depth > 1)
+	XInstallColormap(dpy,curcmap);
+    else if (event.type == LeaveNotify && depth > 1)
+	XInstallColormap(dpy,DefaultColormap(dpy,DefaultScreen(dpy)));
+}
+
+/*********************************************************************/
+/* New functions Added for compatability with old SUN SUNCORE calls  */
+/*********************************************************************/
+#ifdef HPUX
+ setline2xw(thick, style)
+#else
+ setline2xw_(thick, style)
+#endif
+int *thick, *style;
+{
+    int thk, sty;
+
+    thk  =  *thick;
+    sty  =  *style;
+
+    XSetLineAttributes(dpy,gc,(unsigned long)thk,sty,CapNotLast,JoinRound);
+
+    return(0);
+}
+
+
+#ifdef HPUX
+ pixelarrayxw(px, py, m, n, colorind)
+#else
+ pixelarrayxw_(px, py, m, n, colorind)
+#endif
+int *px, *py;
+int *m, *n;
+int *colorind;
+{
+    int x, y, sx, index;
+    int lx, ly;
+    int cc;
+
+    x = *px;
+    y = SCREEN_BOTTOM - *py;
+    sx = *px;
+    index = 0;
+
+    for(ly = 0; ly < *n; ly++) {
+        for(lx = 0; lx < *m; lx++) {
+        /*  index = (*m) * ly + lx;                                  */
+        /*  XSetForeground(dpy, gc, (unsigned long)colorind[index]); */
+            XSetForeground(dpy, gc, (unsigned long)colorind[index++]);
+            XDrawPoint(dpy, curwin, gc, x, y);
+            x++;
+        }
+        y++;
+        x = sx;
+        XFlush(dpy);
+    }
+    return(0);
+}
+/*****************************************************************/
+
+
+

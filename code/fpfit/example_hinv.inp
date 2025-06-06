@@ -1,0 +1,134 @@
+ttl   1 'none'
+hyp 'example_inv.arc'
+out 'example.out'
+sum 'example.sum'
+pol 'example.pol'
+for   3
+mag      0.    
+obs  15
+dis  0.1000E+06
+res   100.0    
+ain      0.      180.0    
+amp   1
+bst   0
+fin   1
+rep   1
+cmp   0
+hdr  0.2290E-01 0.7570E-01 0.2285     0.3395    
+mcr  0.2000      1.000      1.000      1.000    
+dir   90.00      250.0      20.00      5.000    
+dip   10.00      90.00      20.00      5.000    
+rak  -180.0      160.0      20.00      10.00    
+chn   1 'VHZ'
+chn   2 'VLZ'
+chn   3 'VDZ'
+hds   1 '2'
+hds   2 'A'
+mcs   1 'W'
+mcs   2 'R'
+mcs   3 'P'
+mcs   4 'O'
+rev   1 'CMB  ' 'BK'        0        0
+rev   2 'FRI  ' 'BK'        0        0
+rev   3 'MIN  ' 'BK'        0        0
+rev   4 'PAS  ' 'CI'        0        0
+rev   5 'SIM  ' 'CI'        0        0
+rev   6 'CBL  ' 'NC'        0        0
+rev   7 'DBO  ' 'NC'        0        0
+rev   8 'EXS  ' 'NC'        0        0
+rev   9 'LRC  ' 'NC'        0        0
+rev  10 'MIL  ' 'NC'        0        0
+rev  11 'NOC  ' 'NC'        0        0
+rev  12 'CVL  ' 'NC'        0 19881204
+rev  13 'ABJ  ' 'NC'        0        0
+rev  14 'ARR  ' 'NC'        0 19880602
+rev  15 'BSC  ' 'NC'        0        0
+rev  16 'CBW  ' 'NC'        0 19920325
+rev  17 'LCM  ' 'NC'        0        0
+rev  18 'NPV  ' 'NC'        0 19891107
+rev  19 'PPR  ' 'NC'        0        0
+rev  20 'PSM  ' 'NC'        0 19890321
+rev  21 'ADH  ' 'NN'        0 19841105
+rev  22 'ADH  ' 'NN' 19880309        0
+rev  23 'ANT  ' 'NN'        0 19841105
+rev  24 'ANT  ' 'NN' 19880309        0
+rev  25 'BAB  ' 'NN'        0 19860401
+rev  26 'BEN  ' 'NN'        0 19870210
+rev  27 'BHP  ' 'NN' 19840810        0
+rev  28 'BIS  ' 'NN'        0        0
+rev  29 'BMN  ' 'NN'        0 19850516
+rev  30 'CAS  ' 'NN'        0        0
+rev  31 'CWC  ' 'NN' 19840810        0
+rev  32 'DIX  ' 'NN'        0 19880218
+rev  33 'FLV  ' 'NN'        0        0
+rev  34 'GNO  ' 'NN'        0        0
+rev  35 'GVR  ' 'NN'        0        0
+rev  36 'HYX  ' 'NN' 19860126        0
+rev  37 'IND  ' 'NN'        0 19860118
+rev  38 'KBF  ' 'NN'        0        0
+rev  39 'LHV  ' 'NN'        0        0
+rev  40 'LOY  ' 'NN'        0 19860118
+rev  41 'LUL  ' 'NN' 19860506        0
+rev  42 'MCC  ' 'NN'        0        0
+rev  43 'MIL  ' 'NN' 19880309        0
+rev  44 'MON  ' 'NN'        0        0
+rev  45 'MPK  ' 'NN'        0        0
+rev  46 'RYN  ' 'NN'        0        0
+rev  47 'SLK  ' 'NN'        0        0
+rev  48 'TAH  ' 'NN'        0 19860118
+rev  49 'TNK  ' 'NN' 19860118        0
+rev  50 'TNP  ' 'NN'        0        0
+rev  51 'VIP  ' 'NN'        0        0
+rev  52 'VPK  ' 'NN'        0 19860118
+rev  53 'WCN  ' 'NN' 19841122 19870318
+rev  54 'WMD  ' 'NN'        0        0
+rev  55 'WSH  ' 'NN'        0        0
+rev  56 'YAK  ' 'NN' 19790101 19810309
+rev  57 'YAK  ' 'NN' 19810626 19810824
+rev  58 'GAS  ' 'WR'        0        0
+rev  59 'KPK  ' 'WR'        0        0
+rev  60 'MGL  ' 'WR'        0        0
+rev  61 'ORV  ' 'WR'        0        0
+rev  62 'PLM  ' 'WR'        0        0
+rev  63 'PYR  ' 'WR'        0        0
+rev  64 'MTC  ' 'NC' 19880901        0
+rev  65 'PAG  ' 'NC' 19850327 19850808
+rev  66 'PBW  ' 'NC' 19850426 19850807
+rev  67 'PCA  ' 'NC' 19850411 19860423
+rev  68 'PGH  ' 'NC' 19850502 19850808
+rev  69 'PHA  ' 'NC' 19850328 19850808
+rev  70 'PHC  ' 'NC' 19850429 19850807
+rev  71 'PHS  ' 'NC' 19850524 19850809
+rev  72 'PMC  ' 'NC' 19850328 19850808
+rev  73 'PMP  ' 'NC' 19850425 19850808
+rev  74 'PMR  ' 'NC' 19850326 19850808
+rev  75 'PPF  ' 'NC' 19850306 19850808
+rev  76 'PSH  ' 'NC' 19850410 19850808
+rev  77 'PSR  ' 'NC' 19850411 19850808
+rev  78 'PST  ' 'NC' 19850329 19850809
+rev  79 'PTR  ' 'NC' 19850520 19850808
+rev  80 'PWK  ' 'NC' 19850306 19850809
+rev  81 'PWK  ' 'NC' 19890411 19900118
+rev  82 'HJG  ' 'NC' 19881019 19910327
+rev  83 'CAO  ' 'NC' 19900306 19920324
+rev  84 'CAO  ' 'NC' 19900306 19910402
+rev  85 'PWK  ' 'NC' 19890411 19900118
+rev  86 'ADW  ' 'NC' 19780502 19780517
+rev  87 'AFH  ' 'NC' 19780505 19780517
+rev  88 'AOD  ' 'NC' 19780502 19780517
+rev  89 'AOD  ' 'NC' 19790201 19790526
+rev  90 'BPY  ' 'NC' 19770204 19770523
+rev  91 'BRM  ' 'NC' 19771117 19771123
+rev  92 'BSG  ' 'NC' 19880901 19890112
+rev  93 'CCN  ' 'NC' 19770131 19770317
+rev  94 'CPA  ' 'NC' 19770815 19770901
+rev  95 'HJG  ' 'NC' 19881019 19910327
+rev  96 'JRW  ' 'NC' 19790613 19790628
+rev  97 'JTG  ' 'NC' 19780620 19781215
+rev  98 'MCU  ' 'NC' 19790612 19790731
+rev  99 'MNH  ' 'NC' 19781004 19781214
+rev 100 'NTB  ' 'NC' 19800701 19800801
+rev 101 'PPF  ' 'NC' 19770118 19770405
+rev 102 'PPF  ' 'NC' 19780526 19780705
+rev 103 'PSM  ' 'NC' 19771014 19771116
+rev 104 'BAP  ' 'NC' 19911217 19940301

@@ -1,0 +1,24 @@
+ttl   1 'example_ell.arc                               Thu Jan 14 17:05:45 1999'
+hyp 'example_ell.arc'
+out 'example.out'
+pol 'example.pol'
+sum 'example.fps'
+for   2
+mag      0.    
+obs  15
+dis  0.1000E+06
+res   100.0    
+ain      0.      180.0    
+amp   0
+bst   0
+fin   1
+rep   1
+cmp   0
+hdr  0.1000E-01 0.2000E-01 0.5000E-01 0.1000    
+mcr   1.000      1.000      1.000      1.000    
+dir   90.00      250.0      20.00      5.000    
+dip   10.00      90.00      20.00      5.000    
+rak  -180.0      160.0      20.00      10.00    
+chn   1 'VHZ'
+hds   1 '2'
+mcs   1 'W'

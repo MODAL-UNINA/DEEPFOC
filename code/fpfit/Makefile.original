@@ -1,0 +1,89 @@
+# solaris
+
+FC	= f77
+CC	= cc
+CPPFLAGS = -I/usr/openwin/share/include
+XPLOT	= plotkit.a -lX11 -lm
+
+# GNU
+
+#FC	= g77
+#FC	= gfortran
+#CC	= gcc
+
+FFLAGS = -O
+XPLOT   = plotkit.a -lX11 -lm
+
+OBJS1	= askc.o askr.o auxpln.o blurb.o compl.o csort.o \
+	fpout.o geocen.o hhog.o jask.o leng.o \
+	params.o pexcf.o input.o range.o rdeq1.o rdeq2.o rdeq3.o rdiff.o \
+	readfl.o refrmt.o search.o shrflt.o tandp.o upstr.o askl.o
+
+OBJS2	= circle.o plotpl.o pltsm1.o plus.o strnt1.o tpplt1.o \
+	askc.o auxpln.o tandp.o geocen.o jask.o leng.o
+
+OBJS3	= askc.o pltsym.o auxpln.o strnet.o plus.o \
+	jask.o plotpl.o tpplot.o circle.o geocen.o \
+	leng.o tandp.o intero.o pltnet.o pltsol.o
+
+OBJS4	= askc.o auxpln.o strnet.o plus.o \
+	jask.o plotpl.o tpplot.o circle.o geocen.o \
+	leng.o tandp.o intero.o pltnet.o pltsol.o pltsyp.o
+
+OBJS5	= askc.o auxpln.o leng.o tandp.o geocen.o
+
+PLTOBJS	= absmov.o afmbd.o afmfon.o afmlod.o allocu.o applst.o axis.o \
+	  centxt.o chargen.o clipper.o closeplot.o cursor.o downshift.o \
+	  flush_it.o fndcde.o get_gin_pt.o getans.o getxgin.o iaquest.o ictype.o \
+	  ideblank.o igettok.o igetvals.o iiquest.o inextval.o irquest.o itlen.o \
+	  lentrue.o line.o lstyle.o mpaxis.o mpline2.o newpen.o \
+	  newplot.o npnewpen.o npplot.o npplots.o npsymbol.o number.o nxnewpen.o \
+	  nxplot.o nxplots.o nxsymbol.o plclip.o plot.o plotclip.o plotline.o \
+	  plotngon.o plots.o plssymb.o plsymb.o psenv.o psiobd.o pspage.o \
+	  pstrlr.o putint.o rsintemplate.o rstemplate.o scale.o setscale.o startplot.o \
+	  symbl.o symbol.o text.o tstamp.o tstend.o upshift.o \
+	  vecstr.o where.o xlengstr.o xdevice.o
+
+plotkit:	$(PLTOBJS)
+	ar r plotkit.a $(PLTOBJS)
+	ranlib plotkit.a
+
+fpfit:	fpfit_v1.5.o $(OBJS1)
+	$(FC) $(FFLAGS) -o fpfit \
+	fpfit_v1.5.o $(OBJS1) 
+
+fppage:	fppage.o $(OBJS2)
+	$(FC) $(FFLAGS) -o fppage \
+	fppage.o $(OBJS2) $(XPLOT)
+
+fpplot:	fpplot.o $(OBJS3)
+	$(FC) $(FFLAGS) -o fpplot \
+	fpplot.o $(OBJS3) $(XPLOT)
+
+aspar3x:	aspar3x.o 
+	$(FC) $(FFLAGS) -o aspar3x \
+	aspar3x.o $(XPLOT)
+
+fpplot_www:     fpplot_www.o $(OBJS3)
+	$(FC) $(FFLAGS) -o fpplot_www \
+	fpplot_www.o $(OBJS3) $(XPLOT)
+
+ptplot:	ptplot.o  $(OBJS4)
+	$(FC) $(FFLAGS) -o ptplot \
+	ptplot.o $(OBJS4) $(XPLOT)
+
+mktable:	mktable.o $(OBJS5)
+	$(FC) $(FFLAGS) -o mktable \
+	mktable.o $(OBJS5) 
+
+junk:	junk.o $(OBJS5)
+	$(FC) $(FFLAGS) -o junk \
+	junk.o $(OBJS5) 
+
+zdstrib:	zdstrib.o $(OBJS5) askr.o jask.o
+	$(FC) $(FFLAGS) -o zdstrib \
+	zdstrib.o $(OBJS5) askr.o jask.o
+
+fpfit2gmt:	fpfit2gmt.o 
+	$(FC) $(FFLAGS) -o fpfit2gmt \
+	fpfit2gmt.o 

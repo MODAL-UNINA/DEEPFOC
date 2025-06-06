@@ -1,0 +1,19 @@
+input.f: added kdate array, date range of kilsta
+
+rdeq1.f: added kdate
+
+rdeq2.f: added kdate
+
+rdeq3.f: added kdate, cmpnt, loc arrays
+	 added blast flag, code to skip blasts (non-double-couple sources)
+	 added ih, im: origin hour, minute
+	 commented out mag preference rules
+
+params.f: added kdate array
+
+fpfit_v1.4.f: Change comment for 2007/06/01
+fpfit_v1.5.f: Change comment for 2011/07/13
+
+Makefile: change to cc, f77 instead of gcc, g77
+	  added all, clean, distclean targets
+	  Cleaned up some dependencies.

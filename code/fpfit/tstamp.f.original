@@ -1,0 +1,18 @@
+      Subroutine TSTAMP (string)
+C
+      Implicit   None
+C
+      Character  FDATE*24
+      External   FDATE
+C
+      Character  string*(*)
+C
+C
+C...  Assume Fortran correctly blank pads or truncates Character*(*) assignments
+      string = FDATE ()
+C
+      Return
+C
+      End
+
+

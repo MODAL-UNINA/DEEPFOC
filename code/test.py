@@ -48,7 +48,7 @@ root_dir = scripts_dir.parent
 id_device = -1
 
 # Define paths for saving results, input and output directories
-save_folders = ["zone1", "zone2", "zone3"]  # Example folder names, adjust as needed
+save_folders = ["zone1", "zone2", "zone3", "zone4"]  # Example folder names, adjust as needed
 
 for save_folder in save_folders:
     save_dir = root_dir / "results" / save_folder

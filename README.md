@@ -13,10 +13,7 @@ This repository contains code for seismic analysis and focal mechanism inversion
   - [Analysis](#analysis)
   - [Training](#training)
   - [Testing and Evaluation](#testing-and-evaluation)
-- [Customization](#customization)
-- [Contributions](#contributions)
-- [License](#license)
-- [Contact](#contact)
+- [Acknowledgements](#acknowledgements)
 
 ## Overview
 
@@ -141,3 +138,6 @@ The testing script (`test.py`) performs the following steps:
 - Generates comparative plots (e.g., CP comparison plots and beachball plots) to visually compare the model’s performance with FPfit inversion results.
 
 This script provides detailed insights into the model's performance and robustness on the test datasets.
+
+## Acknowledgements
+The work was produced with the co-financing of the European Union - Next Generation EU. This publication has been supported by the project titled D.I.R.E.C.T.I.O.N.S. - Deep learning aIded foReshock deteCTIOn Of iNduced mainShocks, project code: P20220KB4F, CUP: E53D23021910001, PRIN 2022 - Piano Nazionale di Ripresa e Resilienza (PNRR), Mission 4 “Istruzione e Ricerca” - Componente C2 Investimento 1.1, “Fondo per il Programma Nazionale di Ricerca e Progetti di Rilevante Interesse Nazionale (PRIN)”. This work was partially supported by the PNRR project FAIR -  Future AI Research (PE00000013), Spoke 3, under the NRRP MUR program funded by the NextGenerationEU.
